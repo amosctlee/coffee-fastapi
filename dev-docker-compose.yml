@@ -1,0 +1,58 @@
+version: "3.9"
+
+services: 
+      
+    frontend:
+        container_name: frontend
+        hostname: frontend
+        image: nginx
+        volumes:
+            - ./nginx/conf.d/template_dev:/etc/nginx/templates
+            - ./nginx/logs:/var/log/nginx
+        ports:
+            - "9099:80"  # 如果要從localhost 連入可以開，從ngrok 連入則可以不開
+        environment:
+            # - NGINX_HOST=foobar.com
+            - NGINX_PORT=80
+            - API_HOST=coffee_brewing_diary_api
+            - API_PORT=8000
+    
+    www_ngrok:
+        container_name: www_ngrok
+        depends_on: 
+            - frontend
+        image: wernight/ngrok
+        command: ngrok http frontend:80
+        ports:
+            - 4040:4040
+    
+    coffee_brewing_diary_api:
+        container_name: coffee_brewing_diary_api
+        hostname: coffee_brewing_diary_api
+        build:
+            context: ./app
+            dockerfile: dockerfile
+        image: coffee_brewing_diary_api:dev
+        working_dir: /app
+        ports: 
+            - 8000:8000
+        environment: 
+            "ENV": "dev"
+        volumes: 
+            - ./app:/app
+        command: ["uvicorn", "coffee.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+        # tty: true
+        restart: always
+
+    db:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: coffeedb
+            POSTGRES_DB: coffeedb
+    
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8088:8080

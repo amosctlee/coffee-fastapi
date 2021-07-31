@@ -1,0 +1,52 @@
+
+version: '3'
+services:
+    frontend:
+        restart: unless-stopped
+        image: staticfloat/nginx-certbot
+        ports:
+            - 80:80/tcp
+            - 443:443/tcp
+        # extra_hosts:
+        #     - "host.docker.internal:host-gateway"
+        environment:
+            CERTBOT_EMAIL: qoorz@qoorz.xyz
+            # variable names are space-separated
+            ENVSUBST_VARS: FQDN SERVICE_HOST SERVICE_PORT
+            FQDN: coffeeapi.qoorz.xyz
+            SERVICE_HOST: coffee_brewing_diary_api
+            SERVICE_PORT: 8000
+        volumes:
+          - ./nginx/conf.d/template_prod:/etc/nginx/user.conf.d:ro
+          - letsencrypt:/etc/letsencrypt
+
+    coffee_brewing_diary_api:
+        container_name: coffee_brewing_diary_api
+        hostname: coffee_brewing_diary_api
+        build:
+            context: ./app
+            dockerfile: dockerfile
+        image: coffee_brewing_diary_api:prod
+        working_dir: /app
+        environment: 
+            "ENV": "prod"
+        command: ["uvicorn", "coffee.main:app", "--host", "0.0.0.0", "--port", "8000"]
+        restart: always
+        
+    db:
+        image: postgres
+        restart: always
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_PASSWORD: coffeedb
+            POSTGRES_DB: coffeedb
+    
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8088:8080
+
+volumes:
+    letsencrypt:
