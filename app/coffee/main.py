@@ -10,10 +10,24 @@ from fastapi.security import OAuth2PasswordRequestForm
 from . import models, config, database, dependencies
 from .routers import users, coffee_beans
 
+
+# 應該要用 Alembic 來創建資料庫，這邊暫時直接創建
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(
     openapi_url="/api/v1/openapi.json",
+    title="Coffee Brewing Diary API",
+    version="0.0.1",
+    terms_of_service="http://example.com/terms/",
+    contact={
+        "name": "coffee man",
+        "url": "http://coffee_man.example.com/contact/",
+        "email": "coffee_man@example.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
     )
 
 app.include_router(users.router)
