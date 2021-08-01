@@ -18,3 +18,8 @@
 4. docker-compose -f prod-docker-compose.yml up -d
 5. 觀察服務啟動情況: docker-compose -f prod-docker-compose.yml logs -f
 6. 開始訪問 domain name
+
+### 測試
+```
+docker exec coffee_brewing_diary_api pytest
+```
