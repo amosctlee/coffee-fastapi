@@ -16,6 +16,8 @@ services:
             - NGINX_PORT=80
             - API_HOST=coffee_brewing_diary_api
             - API_PORT=8000
+        depends_on: 
+            - coffee_brewing_diary_api
     
     www_ngrok:
         container_name: www_ngrok
@@ -42,6 +44,8 @@ services:
             - ./app:/app
         command: ["uvicorn", "coffee.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
         # tty: true
+        depends_on: 
+            - db
         restart: always
 
     db:
