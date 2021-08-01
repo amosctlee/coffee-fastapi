@@ -7,6 +7,8 @@ from fastapi import HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from .. import crud, schemas
 from ..dependencies import get_db
+from .. import dependencies
+
 
 router = APIRouter(
     prefix="/users",
@@ -26,7 +28,7 @@ async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 
-@router.get("/", response_model=List[schemas.UserOut])
+@router.get("/", response_model=List[schemas.UserOut], dependencies=[Depends(dependencies.get_current_active_user)])
 async def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
     users_out = []
@@ -40,7 +42,7 @@ async def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_
     return users_out
     
 
-@router.get("/{user_id}", response_model=schemas.User)
+@router.get("/{user_id}", response_model=schemas.User, dependencies=[Depends(dependencies.get_current_active_user)])
 async def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
@@ -48,7 +50,7 @@ async def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.post("/{user_id}/brewing/{coffee_bean_id}", response_model=schemas.Brewing)
+@router.post("/{user_id}/brewing/{coffee_bean_id}", response_model=schemas.Brewing, dependencies=[Depends(dependencies.get_current_active_user)])
 async def create_brewing(
         user_id: int,
         coffee_bean_id: int,
@@ -61,7 +63,7 @@ async def create_brewing(
     return db_brewing
 
 
-@router.get("/{user_id}/brewings", response_model=List[schemas.Brewing])
+@router.get("/{user_id}/brewings", response_model=List[schemas.Brewing], dependencies=[Depends(dependencies.get_current_active_user)])
 async def read_user_brewings(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:

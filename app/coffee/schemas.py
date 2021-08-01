@@ -23,6 +23,7 @@ class Brewing(BrewingBase):
 
 
 class UserBase(BaseModel):
+    username: str
     email: str
 
 
@@ -38,6 +39,8 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
+class UserInDB(User):
+    hashed_password: str
 
 class UserOut(UserBase):
     # 列出全部users 時，不要把他們的沖煮紀錄回傳
